@@ -10,7 +10,7 @@
   "dependencies": {
     "@charlietango/react-umbraco": "workspace:*",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0",
+    "react-dom": "^19.1.0"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.16",

@@ -25,6 +25,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
+    },
+    "./forms": {
+      "types": "./dist/forms/index.d.ts",
+      "import": "./dist/forms/index.mjs",
+      "require": "./dist/forms/index.cjs"
     }
   },
   "main": "./dist/index.mjs",
@@ -34,7 +39,8 @@
     "*": {
       "*": [
         "./dist/*",
-        "./dist/index.d.ts"
+        "./dist/index.d.ts",
+        "./dist/forms/index.d.ts"
       ]
     }
   },

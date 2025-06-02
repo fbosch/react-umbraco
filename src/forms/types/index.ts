@@ -8,7 +8,7 @@ export type Branded<T, B> = T & Brand<B>;
 
 export type UmbracoFormSchema = Branded<
   z.ZodEffects<z.ZodObject<Record<string, z.ZodTypeAny>>>,
-  "UmbracoFromSchema"
+  "UmbracoFormSchema"
 >;
 
 /** Enum of default form field type ids
