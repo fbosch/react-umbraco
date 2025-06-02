@@ -11,6 +11,12 @@ importers:
       html-entities:
         specifier: ^2.6.0
         version: 2.6.0
+      ts-pattern:
+        specifier: ^5.7.1
+        version: 5.7.1
+      zod:
+        specifier: ^3.25.48
+        version: 3.25.48
     devDependencies:
       '@biomejs/biome':
         specifier: ^1.9.4
@@ -2226,6 +2232,9 @@ packages:
     resolution: {integrity: sha512-hdF5ZgjTqgAntKkklYw0R03MG2x/bSzTtkxmIRw/sTNV8YXsCJ1tfLAX23lhxhHJlEf3CRCOCGGWw3vI3GaSPw==}
     engines: {node: '>=18'}
 
+  ts-pattern@5.7.1:
+    resolution: {integrity: sha512-EGs8PguQqAAUIcQfK4E9xdXxB6s2GK4sJfT/vcc9V1ELIvC4LH/zXu2t/5fajtv6oiRCxdv7BgtVK3vWgROxag==}
+
   type-fest@0.21.3:
     resolution: {integrity: sha512-t0rzBq87m3fVcduHDUFhKmyyX+9eo6WQjZvf51Ea/M0Q7+T374Jp1aUiyUl0GKxp8M/OETVHSDvmkyPgvX+X2w==}
     engines: {node: '>=10'}
@@ -2459,6 +2468,9 @@ packages:
   yoctocolors-cjs@2.1.2:
     resolution: {integrity: sha512-cYVsTjKl8b+FrnidjibDWskAv7UKOfcwaVZdp/it9n1s9fU3IkgDbhdIRKCW4JDsAlECJY0ytoVPT3sK6kideA==}
     engines: {node: '>=18'}
+
+  zod@3.25.48:
+    resolution: {integrity: sha512-0X1mz8FtgEIvaxGjdIImYpZEaZMrund9pGXm3M6vM7Reba0e2eI71KPjSCGXBfwKDPwPoywf6waUKc3/tFvX2Q==}
 
 snapshots:
 
@@ -4523,6 +4535,8 @@ snapshots:
       punycode: 2.3.1
     optional: true
 
+  ts-pattern@5.7.1: {}
+
   type-fest@0.21.3:
     optional: true
 
@@ -4774,3 +4788,5 @@ snapshots:
 
   yoctocolors-cjs@2.1.2:
     optional: true
+
+  zod@3.25.48: {}
