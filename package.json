@@ -52,7 +52,7 @@
     "prepare": "simple-git-hooks"
   },
   "stackblitz": {
-    "startCommand": "pnpm build && pnpm --filter=react-umbraco-example dev"
+    "startCommand": "pnpm build && pnpm --filter=react-umbraco-richtext-example dev"
   },
   "dependencies": {
     "html-entities": "^2.6.0",
