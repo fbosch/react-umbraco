@@ -1,2 +1,53 @@
 @import "tailwindcss";
-@plugin "@tailwindcss/typography";
+
+@layer base { 
+
+  textarea, input, select {
+    @apply border border-gray-300 rounded-md px-4 py-2;
+  }
+
+
+  h2 {
+    @apply text-3xl font-bold;
+  }
+
+  button {
+    @apply rounded border border-gray-300 px-4 py-2;
+  }
+
+  input {
+    &[aria-invalid="true"] {
+      @apply border-red-600;
+    }
+  }
+
+  [id^="issue:"] {
+    @apply text-red-600 text-sm mt-1;
+    &:before {
+      content: "❗️";
+      @apply text-red-600 text-sm pr-1;
+    }
+  }
+  
+  [id^="helpText:"] {
+    @apply text-gray-500 text-sm mb-2;
+  }
+
+  label {
+    @apply block text-sm font-medium text-gray-700;
+  }
+
+  section[role="alert"] {
+    @apply mt-4 border border-red-600 rounded-md p-4 mb-7 bg-red-50 max-w-lg;
+    ol {
+      @apply list-inside space-y-1;
+      li {
+        @apply text-sm text-red-700;
+        &:before {
+          @apply text-gray-500 pr-1;
+          content: "❗️";
+        }
+      }
+    }
+  }
+}

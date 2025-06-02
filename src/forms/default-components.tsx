@@ -1,6 +1,7 @@
-import { Fragment } from "react";
+import * as React from "react";
 import { match } from "ts-pattern";
 import type { ZodIssue } from "zod";
+import { DefaultFieldType } from "./constants";
 import { getAttributesForFieldType, getFieldByZodIssue } from "./field-utils";
 import type {
   FieldSettings,
@@ -11,7 +12,6 @@ import type {
   FormPageDto,
   UmbracoFormConfig,
 } from "./types";
-import { DefaultFieldType } from "./types";
 import { getIssueId } from "./umbraco-form-to-zod";
 
 export type ContextProps = {
@@ -88,10 +88,10 @@ export type FieldsetProps = RenderProps & {
 export function Fieldset({ fieldset, children, condition }: FieldsetProps) {
   if (!condition) return null;
   return (
-    <Fragment>
+    <React.Fragment>
       {fieldset.caption ? <h3>{fieldset.caption}</h3> : null}
       {children}
-    </Fragment>
+    </React.Fragment>
   );
 }
 
@@ -101,10 +101,10 @@ export type ColumnProps = RenderProps & {
 
 export function Column({ column, children }: ColumnProps) {
   return (
-    <Fragment>
+    <React.Fragment>
       {column.caption ? <h4>{column.caption}</h4> : null}
       {children}
-    </Fragment>
+    </React.Fragment>
   );
 }
 
@@ -185,14 +185,14 @@ export function Field({
   }
 
   return (
-    <Fragment>
+    <React.Fragment>
       <label htmlFor={field.id} aria-describedby={helpTextId}>
         {field.caption} {indicator}
       </label>
       {helpText}
       {children}
       {validationErrors}
-    </Fragment>
+    </React.Fragment>
   );
 }
 
@@ -244,7 +244,7 @@ export function FieldType({
       ),
     )
     .with(DefaultFieldType.MultipleChoice, (uuid) => (
-      <Fragment>
+      <React.Fragment>
         {field?.preValues?.map((preValue) => {
           const settings = field?.settings as FieldSettings[typeof uuid];
           const id = `${preValue.value}:${field.id}`;
@@ -253,7 +253,7 @@ export function FieldType({
             : attributes.defaultValue === preValue.value ||
               settings.defaultValue === preValue.value;
           return (
-            <Fragment key={id}>
+            <React.Fragment key={id}>
               <label htmlFor={id}>{preValue.caption}</label>
               <input
                 defaultChecked={defaultChecked}
@@ -266,10 +266,10 @@ export function FieldType({
                     : "radio"
                 }
               />
-            </Fragment>
+            </React.Fragment>
           );
         })}
-      </Fragment>
+      </React.Fragment>
     ))
     .with(DefaultFieldType.DropdownList, () => (
       <select {...attributes}>

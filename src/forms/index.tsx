@@ -1,5 +1,6 @@
 export { UmbracoForm } from "./UmbracoForm";
 export { umbracoFormToZodSchema } from "./umbraco-form-to-zod";
+export { DefaultFieldType } from "./constants";
 
 export type {
   FormDto,
@@ -8,5 +9,4 @@ export type {
   FormFieldsetDto,
   FormPageDto,
   UmbracoFormSchema,
-  DefaultFieldType,
 } from "./types";

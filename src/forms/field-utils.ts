@@ -1,6 +1,7 @@
 import { match } from "ts-pattern";
 import type { z } from "zod";
 import { isVisibleBasedOnCondition } from "./conditions";
+import { DefaultFieldType } from "./constants";
 import type {
   DtoWithCondition,
   FieldSettings,
@@ -9,7 +10,6 @@ import type {
   FormPageDto,
   UmbracoFormConfig,
 } from "./types";
-import { DefaultFieldType } from "./types";
 import { type MapFormFieldToZodFn, getIssueId } from "./umbraco-form-to-zod";
 
 // cache fields by id and alias to prevent having to flatten the pages multiple times

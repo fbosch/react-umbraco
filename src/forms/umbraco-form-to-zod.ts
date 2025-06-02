@@ -1,6 +1,7 @@
 import { match } from "ts-pattern";
 import { z } from "zod";
 import { isVisibleBasedOnCondition } from "./conditions";
+import { DefaultFieldType } from "./constants";
 import {
   filterFieldsByConditions,
   getAllFields,
@@ -8,12 +9,11 @@ import {
   getFieldByAlias,
   getFieldByZodIssue,
 } from "./field-utils";
-import {
-  DefaultFieldType,
-  type FormDto,
-  type FormFieldDto,
-  type FormPageDto,
-  type UmbracoFormSchema,
+import type {
+  FormDto,
+  FormFieldDto,
+  FormPageDto,
+  UmbracoFormSchema,
 } from "./types";
 
 /**

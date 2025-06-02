@@ -1,10 +1,4 @@
-import {
-  Fragment,
-  useCallback,
-  useDeferredValue,
-  useState,
-  useTransition,
-} from "react";
+import * as React from "react";
 import type { ZodIssue } from "zod";
 import { isVisibleBasedOnCondition } from "./conditions";
 import * as defaultComponents from "./default-components";
@@ -63,7 +57,6 @@ export interface UmbracoFormProps
 }
 
 function UmbracoForm(props: UmbracoFormProps) {
-  const [, startValidationTransition] = useTransition();
   const {
     form,
     config: configOverride = {},
@@ -94,13 +87,15 @@ function UmbracoForm(props: UmbracoFormProps) {
     ...configOverride,
   } as UmbracoFormConfig;
 
-  const [internalData, setInternalData] = useState<Record<string, unknown>>({});
-  const deferredInternalData = useDeferredValue(internalData);
+  const [internalData, setInternalData] = React.useState<
+    Record<string, unknown>
+  >({});
+  const deferredInternalData = React.useDeferredValue(internalData);
 
-  const [attemptCount, setAttemptCount] = useState<number>(0);
-  const [formIssues, setFormIssues] = useState<ZodIssue[]>([]);
-  const [summaryIssues, setSummaryIssues] = useState<ZodIssue[]>([]);
-  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [attemptCount, setAttemptCount] = React.useState<number>(0);
+  const [formIssues, setFormIssues] = React.useState<ZodIssue[]>([]);
+  const [summaryIssues, setSummaryIssues] = React.useState<ZodIssue[]>([]);
+  const [currentPageIndex, setCurrentPageIndex] = React.useState(0);
   const activePage = form?.pages?.[currentPageIndex];
 
   const checkCondition = (dto: DtoWithCondition) =>
@@ -113,7 +108,7 @@ function UmbracoForm(props: UmbracoFormProps) {
 
   const totalPages = form?.pages?.filter(checkCondition).length ?? 1;
 
-  const validateFormData = useCallback(
+  const validateFormData = React.useCallback(
     (coercedData: Record<string, unknown>, fieldName?: string) => {
       const parsedForm = config?.schema?.safeParse(coercedData);
       if (parsedForm?.success) {
@@ -138,7 +133,7 @@ function UmbracoForm(props: UmbracoFormProps) {
     [form, config.schema],
   );
 
-  const isCurrentPageValid = useCallback(() => {
+  const isCurrentPageValid = React.useCallback(() => {
     // dont validate fields that are not visible to the user
     const fieldsWithConditionsMet = filterFieldsByConditions(
       form,
@@ -186,7 +181,7 @@ function UmbracoForm(props: UmbracoFormProps) {
     return true;
   }, [config, form, activePage, validateFormData, deferredInternalData]);
 
-  const handleOnChange = useCallback(
+  const handleOnChange = React.useCallback(
     (e: React.ChangeEvent<HTMLFormElement>) => {
       const field = e.target;
       const formData = new FormData(e.currentTarget);
@@ -211,7 +206,7 @@ function UmbracoForm(props: UmbracoFormProps) {
           (attemptCount > 0 && config.reValidateMode === "onChange");
 
         if (validateOnChange) {
-          startValidationTransition(() => {
+          React.startTransition(() => {
             if (validateFormData(coercedData, field.name).success === false) {
               return;
             }
@@ -227,7 +222,7 @@ function UmbracoForm(props: UmbracoFormProps) {
     [config, attemptCount, activePage, validateFormData, onChange],
   );
 
-  const handleOnBlur = useCallback(
+  const handleOnBlur = React.useCallback(
     (e: React.FocusEvent<HTMLFormElement, HTMLElement>) => {
       const field = e.target;
       const formData = new FormData(e.currentTarget as HTMLFormElement);
@@ -240,7 +235,7 @@ function UmbracoForm(props: UmbracoFormProps) {
           (attemptCount > 0 && config.reValidateMode === "onBlur");
 
         if (validateOnBlur) {
-          startValidationTransition(() => {
+          React.startTransition(() => {
             validateFormData(coercedData, field.name);
             if (form.pages && form.pages?.length > 1) {
               isCurrentPageValid();
@@ -256,14 +251,14 @@ function UmbracoForm(props: UmbracoFormProps) {
     [onBlur, validateFormData, form, isCurrentPageValid, attemptCount, config],
   );
 
-  const scrollToTopOfForm = useCallback(() => {
+  const scrollToTopOfForm = React.useCallback(() => {
     const formElement = document.querySelector(`[name="${form.id}"]`);
     if (formElement) {
       formElement.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, [form]);
 
-  const focusFirstInvalidField = useCallback(() => {
+  const focusFirstInvalidField = React.useCallback(() => {
     const fieldWithIssues = formIssues?.find((issue) => issue.path.length > 0);
     if (fieldWithIssues) {
       const fieldId = fieldWithIssues.path.join(".");
@@ -278,9 +273,9 @@ function UmbracoForm(props: UmbracoFormProps) {
     }
   }, [formIssues]);
 
-  const handleNextPage = useCallback(() => {
+  const handleNextPage = React.useCallback(() => {
     if (config.shouldValidate && config.shouldUseNativeValidation === false) {
-      startValidationTransition(() => {
+      React.startTransition(() => {
         if (isCurrentPageValid() === false) {
           scrollToTopOfForm();
           focusFirstInvalidField();
@@ -295,7 +290,7 @@ function UmbracoForm(props: UmbracoFormProps) {
     }
   }, [config, isCurrentPageValid, focusFirstInvalidField, scrollToTopOfForm]);
 
-  const handlePreviousPage = useCallback(
+  const handlePreviousPage = React.useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
       setCurrentPageIndex((prev) => (prev === 0 ? prev : prev - 1));
@@ -304,14 +299,14 @@ function UmbracoForm(props: UmbracoFormProps) {
     [scrollToTopOfForm],
   );
 
-  const handleOnSubmit = useCallback(
+  const handleOnSubmit = React.useCallback(
     (e: React.FormEvent<HTMLFormElement>) => {
       if (config.shouldValidate && config.shouldUseNativeValidation === false) {
         e.preventDefault();
         if (totalPages > 1 && currentPageIndex !== totalPages - 1) {
           return handleNextPage();
         }
-        startValidationTransition(() => {
+        React.startTransition(() => {
           setAttemptCount((prev) => prev + 1);
           const validationResult = validateFormData(internalData);
 
@@ -352,7 +347,7 @@ function UmbracoForm(props: UmbracoFormProps) {
   };
 
   return (
-    <Fragment>
+    <React.Fragment>
       {form.showValidationSummary && attemptCount > 0 ? (
         <ValidationSummary {...context} issues={summaryIssues} />
       ) : null}
@@ -419,7 +414,7 @@ function UmbracoForm(props: UmbracoFormProps) {
         ))}
         {children}
         {totalPages > 1 ? (
-          <Fragment>
+          <React.Fragment>
             <PreviousButton
               onClick={handlePreviousPage}
               currentPage={currentPageIndex}
@@ -431,7 +426,7 @@ function UmbracoForm(props: UmbracoFormProps) {
               totalPages={totalPages}
               {...context}
             />
-          </Fragment>
+          </React.Fragment>
         ) : null}
         <SubmitButton
           currentPage={currentPageIndex}
@@ -439,7 +434,7 @@ function UmbracoForm(props: UmbracoFormProps) {
           {...context}
         />
       </Form>
-    </Fragment>
+    </React.Fragment>
   );
 }
 
