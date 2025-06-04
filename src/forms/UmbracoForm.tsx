@@ -1,11 +1,13 @@
 import * as React from "react";
-import type { ZodIssue } from "zod";
+import { type ZodIssue, ZodIssueCode } from "zod";
 import { isVisibleBasedOnCondition } from "./conditions";
 import * as defaultComponents from "./default-components";
 import {
   filterFieldsByConditions,
   getAllFieldsOnPage,
   getFieldByZodIssue,
+  getRecaptcha2Field,
+  getRecaptchaV3WithScoreField,
 } from "./field-utils";
 import type { DtoWithCondition, FormDto, UmbracoFormConfig } from "./types";
 import {
@@ -32,6 +34,7 @@ export interface UmbracoFormProps
   form: FormDto;
   /** Optional configuration overrides for the Umbraco form */
   config?: Partial<UmbracoFormConfig>;
+  validateRecaptcha?: () => boolean;
   /** Custom render function for the form */
   renderForm?: RenderFn<typeof defaultComponents.Form>;
   /** Custom render function for a page within the form */
@@ -60,6 +63,7 @@ function UmbracoForm(props: UmbracoFormProps) {
   const {
     form,
     config: configOverride = {},
+    validateRecaptcha,
     renderForm: Form = defaultComponents.Form,
     renderPage: Page = defaultComponents.Page,
     renderFieldset: Fieldset = defaultComponents.Fieldset,
@@ -108,29 +112,59 @@ function UmbracoForm(props: UmbracoFormProps) {
 
   const totalPages = form?.pages?.filter(checkCondition).length ?? 1;
 
+  const isRecaptchaInvalid = React.useCallback(() => {
+    if (getRecaptcha2Field(form) || getRecaptchaV3WithScoreField(form)) {
+      return validateRecaptcha?.() === false || false;
+    }
+    return false;
+  }, [validateRecaptcha, form]);
+
   const validateFormData = React.useCallback(
     (coercedData: Record<string, unknown>, fieldName?: string) => {
       const parsedForm = config?.schema?.safeParse(coercedData);
-      if (parsedForm?.success) {
-        setFormIssues([]);
-      } else if (parsedForm?.error?.issues) {
+      const formIssues: ZodIssue[] = [];
+
+      if (isRecaptchaInvalid()) {
+        const recaptcha2Field = getRecaptcha2Field(form);
+        if (recaptcha2Field?.alias) {
+          formIssues.push({
+            code: ZodIssueCode.custom,
+            path: [recaptcha2Field.alias],
+            message: recaptcha2Field.requiredErrorMessage ?? "",
+          });
+        }
+        const recaptchaV3Field = getRecaptchaV3WithScoreField(form);
+        if (recaptchaV3Field?.alias) {
+          formIssues.push({
+            code: ZodIssueCode.custom,
+            path: [recaptchaV3Field.alias],
+            message: recaptchaV3Field.requiredErrorMessage ?? "",
+          });
+        }
+      }
+
+      if (!parsedForm?.success) {
         setFormIssues((prev) =>
           sortZodIssuesByFieldAlias(
             form,
-            fieldName
+            (fieldName
               ? [
                   ...prev.filter((issue) => issue.path.join(".") !== fieldName),
                   ...parsedForm.error.issues.filter(
                     (issue) => issue.path.join(".") === fieldName,
                   ),
                 ]
-              : parsedForm.error.issues,
+              : parsedForm.error.issues
+            ).concat(formIssues),
           ),
         );
+        return parsedForm;
       }
+
+      setFormIssues(formIssues);
       return parsedForm;
     },
-    [form, config.schema],
+    [form, config.schema, isRecaptchaInvalid],
   );
 
   const isCurrentPageValid = React.useCallback(() => {
@@ -215,7 +249,9 @@ function UmbracoForm(props: UmbracoFormProps) {
             }
           });
         }
-      } else if (typeof onChange === "function") {
+      }
+
+      if (typeof onChange === "function") {
         onChange(e);
       }
     },
@@ -438,6 +474,7 @@ function UmbracoForm(props: UmbracoFormProps) {
   );
 }
 
+UmbracoForm.Form = defaultComponents.Form;
 UmbracoForm.FieldType = defaultComponents.FieldType;
 UmbracoForm.Page = defaultComponents.Page;
 UmbracoForm.Fieldset = defaultComponents.Fieldset;
@@ -448,12 +485,5 @@ UmbracoForm.NextButton = defaultComponents.NextButton;
 UmbracoForm.PreviousButton = defaultComponents.PreviousButton;
 UmbracoForm.ValidationSummary = defaultComponents.ValidationSummary;
 
-export {
-  umbracoFormToZodSchema,
-  umbracoFormPageToZodSchema,
-  umbracoFormPagesToZodSchemas,
-  coerceFormData,
-  UmbracoForm,
-};
 export type * from "./types";
 export default UmbracoForm;

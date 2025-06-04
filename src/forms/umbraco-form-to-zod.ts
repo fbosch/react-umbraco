@@ -57,7 +57,7 @@ const refineForConditionals =
         mapCustomFieldToZodType,
       );
 
-      if (field?.required && isVisible) {
+      if (field?.required && isVisible && !value[alias]) {
         if (!value[alias]) {
           ctx.addIssue({
             code: z.ZodIssueCode.invalid_type,
@@ -66,6 +66,25 @@ const refineForConditionals =
             message: field?.requiredErrorMessage,
           } as z.ZodIssue);
         }
+      }
+    }
+
+    for (const field of fields) {
+      const alias = field?.alias as string;
+      const isVisible = isVisibleBasedOnCondition(
+        field,
+        form,
+        value,
+        mapCustomFieldToZodType,
+      );
+
+      if (field?.required && isVisible && !value[alias]) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.invalid_type,
+          path: [field.alias],
+          fatal: true,
+          message: field?.requiredErrorMessage,
+        } as z.ZodIssue);
       }
     }
   };
@@ -85,7 +104,10 @@ function mapFieldsToZodObject(
   const mappedFields = fields?.reduce<Record<string, z.ZodTypeAny>>(
     (acc, field) => {
       if (field?.alias) {
-        acc[field.alias] = mapFieldToZod(field, mapCustomFieldToZodType);
+        const zodType = mapFieldToZod(field, mapCustomFieldToZodType);
+        if (zodType !== null) {
+          acc[field.alias] = zodType;
+        }
       }
       return acc;
     },
@@ -153,7 +175,7 @@ export function umbracoFormToZodSchema(
 export function mapFieldToZod(
   field: FormFieldDto,
   mapCustomFieldToZodType?: MapFormFieldToZodFn,
-): z.ZodTypeAny {
+): z.ZodTypeAny | null {
   let zodType: z.ZodType | undefined = undefined;
 
   const hasCondition =
@@ -221,6 +243,7 @@ export function mapFieldToZod(
         }
       },
     )
+    .with(DefaultFieldType.TitleAndDescription, () => null) // exclude title and description from schema
     .otherwise(() => {
       if (typeof mapCustomFieldToZodType === "function") {
         try {
@@ -233,14 +256,15 @@ export function mapFieldToZod(
       }
     });
 
-  if (!zodType)
+  if (zodType === undefined)
     throw new TypeError(
       `Mapped zod type is undefined for field: ${field?.type?.name} (${field?.type?.id})`,
     );
 
-  if (!field?.required || hasCondition) {
-    zodType = (zodType as z.ZodType).optional();
-  }
+  if (zodType === null) return null;
+
+  // make all optionals and handle the required condition in superRefine in order for all field requirements to be validated at once
+  zodType = (zodType as z.ZodType).optional();
 
   return zodType;
 }

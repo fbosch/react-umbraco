@@ -1,4 +1,4 @@
-export { UmbracoForm } from "./UmbracoForm";
+export { default as UmbracoForm } from "./UmbracoForm";
 export { umbracoFormToZodSchema } from "./umbraco-form-to-zod";
 export { DefaultFieldType } from "./constants";
 

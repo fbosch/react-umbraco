@@ -230,19 +230,13 @@ export function FieldType({
     .with(DefaultFieldType.LongAnswer, DefaultFieldType.RichText, () => (
       <textarea {...attributes} />
     ))
-    .with(
-      DefaultFieldType.Checkbox,
-      DefaultFieldType.DataConsent,
-      DefaultFieldType.Recaptcha2,
-      DefaultFieldType.RecaptchaV3WithScore,
-      () => (
-        <input
-          {...attributes}
-          defaultValue={undefined}
-          defaultChecked={!!attributes.defaultValue}
-        />
-      ),
-    )
+    .with(DefaultFieldType.Checkbox, DefaultFieldType.DataConsent, () => (
+      <input
+        {...attributes}
+        defaultValue={undefined}
+        defaultChecked={!!attributes.defaultValue}
+      />
+    ))
     .with(DefaultFieldType.MultipleChoice, (uuid) => (
       <React.Fragment>
         {field?.preValues?.map((preValue) => {
@@ -289,6 +283,19 @@ export function FieldType({
         </div>
       );
     })
+    .with(
+      DefaultFieldType.Recaptcha2,
+      DefaultFieldType.RecaptchaV3WithScore,
+      () => {
+        return (
+          <pre style={{ color: "orange" }}>
+            ⚠️ ReCAPTCHA fields are not rendered by default.
+            <br />
+            Please implement your own ReCAPTCHA component.
+          </pre>
+        );
+      },
+    )
     .exhaustive();
 }
 

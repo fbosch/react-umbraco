@@ -81,6 +81,34 @@ export function getFieldById(
 }
 
 /**
+ * Retrieves the reCAPTCHA v2 field from the given form.
+ *
+ * @param form - The form from which to retrieve the reCAPTCHA v2 field.
+ * @returns The reCAPTCHA v2 field, if found in the form. Returns undefined if not found.
+ */
+export function getRecaptcha2Field(form: FormDto): FormFieldDto | undefined {
+  const allFields = getAllFields(form);
+  return allFields.find(
+    (field) => field.type?.id === DefaultFieldType.Recaptcha2,
+  );
+}
+
+/**
+ * Retrieves the reCAPTCHA v3 with score field from the given form.
+ *
+ * @param form - The form from which to retrieve the reCAPTCHA v3 with score field.
+ * @returns The reCAPTCHA v3 with score field, if found in the form. Returns undefined if not found.
+ */
+export function getRecaptchaV3WithScoreField(
+  form: FormDto,
+): FormFieldDto | undefined {
+  const allFields = getAllFields(form);
+  return allFields.find(
+    (field) => field.type?.id === DefaultFieldType.RecaptchaV3WithScore,
+  );
+}
+
+/**
  * Retrieves a field from a form by its alias.
  * If the field is cached, it returns the cached field.
  * Otherwise, it finds the field by iterating over all fields.
