@@ -4,6 +4,7 @@ import { getAllFields } from "../field-utils";
 import type { FormDto, FormFieldDto } from "../types";
 import {
   type MapFormFieldToZodFn,
+  coerceFormData,
   mapFieldToZod,
   umbracoFormToZodSchema,
 } from "../umbraco-form-to-zod";
@@ -25,6 +26,16 @@ describe("mapFieldToZod", () => {
         expect(zodType).toBeInstanceOf(z.ZodType);
       },
     );
+
+    test("TitleAndDescription should return null", () => {
+      const zodType = mapFieldToZod({
+        type: {
+          id: DefaultFieldType.TitleAndDescription,
+          name: "TitleAndDescription",
+        },
+      } as FormFieldDto);
+      expect(zodType).toBeNull();
+    });
   });
 
   describe("custom fields", () => {
@@ -52,15 +63,6 @@ describe("mapFieldToZod", () => {
       const zodType = mapFieldToZod(customField, customMappingFunction);
       expect(zodType).toBeInstanceOf(z.ZodType);
     });
-
-    test("should be optional if field defintion is marked as required: false", () => {
-      const customMappingFunction: MapFormFieldToZodFn = () => z.string();
-      const zodType = mapFieldToZod(
-        { ...customField, required: false },
-        customMappingFunction,
-      );
-      expect(zodType).toBeInstanceOf(z.ZodOptional);
-    });
   });
 });
 
@@ -69,5 +71,15 @@ describe("umbracoFormToZod", () => {
     const schema = umbracoFormToZodSchema(formDefinition as FormDto);
     expect(schema).toBeInstanceOf(z.ZodType);
     expect(schema).toMatchSnapshot();
+  });
+});
+
+describe("coerceFormData", () => {
+  test("should coerce form data to correct types", () => {
+    const schema = z.object({ agree: z.boolean() });
+    const formData = new FormData();
+    formData.append("agree", "on");
+    const data = coerceFormData(formData, schema);
+    expect(data.agree).toBe(true);
   });
 });

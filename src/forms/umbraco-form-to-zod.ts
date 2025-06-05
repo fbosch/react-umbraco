@@ -116,14 +116,22 @@ function mapFieldsToZodObject(
   return z.object(mappedFields);
 }
 
+/**
+ * Determines whether a given form field should be skipped based on its type.
+ *
+ * @param field - The form field to evaluate.
+ * @returns A boolean value indicating whether the field should be skipped.
+ */
+function shouldSkipField(field: FormFieldDto): boolean {
+  return field?.type?.id === DefaultFieldType.TitleAndDescription;
+}
+
 export function umbracoFormPageToZodSchema(
   form: FormDto,
   page: FormPageDto,
   mapCustomFieldToZodType?: MapFormFieldToZodFn,
 ): UmbracoFormSchema {
-  const fields = getAllFieldsOnPage(page).filter(
-    (field) => field.id !== DefaultFieldType.TitleAndDescription,
-  );
+  const fields = getAllFieldsOnPage(page).filter(shouldSkipField);
   return mapFieldsToZodObject(fields).superRefine(
     refineForConditionals(form, fields, mapCustomFieldToZodType),
   ) as UmbracoFormSchema;
@@ -153,9 +161,7 @@ export function umbracoFormToZodSchema(
   form: FormDto,
   mapCustomFieldToZodType?: MapFormFieldToZodFn,
 ): UmbracoFormSchema {
-  const fields = getAllFields(form).filter(
-    (field) => field.id !== DefaultFieldType.TitleAndDescription,
-  );
+  const fields = getAllFields(form).filter(shouldSkipField);
 
   const schema = mapFieldsToZodObject(fields).superRefine(
     refineForConditionals(form, fields, mapCustomFieldToZodType),
@@ -178,10 +184,12 @@ export function mapFieldToZod(
 ): z.ZodTypeAny | null {
   let zodType: z.ZodType | undefined = undefined;
 
+  if (shouldSkipField(field)) return null;
+
   const hasCondition =
     field?.condition?.rules && field?.condition?.rules.length > 0;
 
-  match(field?.type?.id.toLowerCase())
+  match(field?.type?.id)
     .with(
       DefaultFieldType.ShortAnswer,
       DefaultFieldType.LongAnswer,
@@ -243,7 +251,6 @@ export function mapFieldToZod(
         }
       },
     )
-    .with(DefaultFieldType.TitleAndDescription, () => null) // exclude title and description from schema
     .otherwise(() => {
       if (typeof mapCustomFieldToZodType === "function") {
         try {
@@ -256,12 +263,11 @@ export function mapFieldToZod(
       }
     });
 
-  if (zodType === undefined)
+  if (zodType === undefined) {
     throw new TypeError(
       `Mapped zod type is undefined for field: ${field?.type?.name} (${field?.type?.id})`,
     );
-
-  if (zodType === null) return null;
+  }
 
   // make all optionals and handle the required condition in superRefine in order for all field requirements to be validated at once
   zodType = (zodType as z.ZodType).optional();
@@ -336,7 +342,7 @@ export function omitFieldsBasedOnConditionFromData(
  */
 export function coerceFormData(
   formData: FormData | undefined,
-  schema: UmbracoFormSchema,
+  schema: z.ZodTypeAny,
 ): Record<string, unknown> {
   const output = {};
 
