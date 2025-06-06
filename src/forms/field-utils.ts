@@ -18,6 +18,16 @@ const cachedFieldsByAlias = new WeakMap<FormDto, Map<string, FormFieldDto>>();
 const cachedFieldsByPage = new WeakMap<FormPageDto, FormFieldDto[]>();
 
 /**
+ * Determines whether a given form field should be skipped in validation logic based on its type.
+ *
+ * @param field - The form field to evaluate.
+ * @returns A boolean value indicating whether the field should be skipped.
+ */
+export function shouldSkipField(field: FormFieldDto): boolean {
+  return field?.type?.id === DefaultFieldType.TitleAndDescription;
+}
+
+/**
  * Retrieves all fields from a given form.
  * If the form's fields are already cached, it returns them from the cache.
  * Otherwise, it flattens the fields from all pages, fieldsets, and columns,

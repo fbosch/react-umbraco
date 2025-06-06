@@ -1,10 +1,11 @@
 import { z } from "zod";
 import { DefaultFieldType } from "../constants";
-import { getAllFields } from "../field-utils";
+import { getAllFields, shouldSkipField } from "../field-utils";
 import type { FormDto, FormFieldDto } from "../types";
 import {
   type MapFormFieldToZodFn,
   coerceFormData,
+  findBaseDef,
   mapFieldToZod,
   umbracoFormToZodSchema,
 } from "../umbraco-form-to-zod";
@@ -14,6 +15,24 @@ const defaultFieldTypes = Object.fromEntries(Object.entries(DefaultFieldType));
 const defaultFieldKeys = Object.keys(
   defaultFieldTypes,
 ) as (keyof typeof defaultFieldTypes)[];
+
+const fieldMappings: Record<DefaultFieldType, unknown> = {
+  [DefaultFieldType.RichText]: z.ZodString,
+  [DefaultFieldType.LongAnswer]: z.ZodString,
+  [DefaultFieldType.ShortAnswer]: z.ZodString,
+  [DefaultFieldType.Password]: z.ZodString,
+  [DefaultFieldType.HiddenField]: z.ZodString,
+  [DefaultFieldType.MultipleChoice]: z.ZodString,
+  [DefaultFieldType.Checkbox]: z.ZodBoolean,
+  [DefaultFieldType.DataConsent]: z.ZodBoolean,
+  [DefaultFieldType.Date]: z.ZodDate,
+  [DefaultFieldType.DropdownList]: z.ZodString,
+  [DefaultFieldType.FileUpload]: z.ZodString,
+  [DefaultFieldType.SingleChoice]: z.ZodString,
+  [DefaultFieldType.TitleAndDescription]: null,
+  [DefaultFieldType.Recaptcha2]: z.ZodBoolean,
+  [DefaultFieldType.RecaptchaV3WithScore]: z.ZodBoolean,
+};
 
 describe("mapFieldToZod", () => {
   describe("convert default fields to corresponding ZodType", () => {
@@ -27,7 +46,7 @@ describe("mapFieldToZod", () => {
       },
     );
 
-    test("TitleAndDescription should return null", () => {
+    test("should skip TitleAndDescription field", () => {
       const zodType = mapFieldToZod({
         type: {
           id: DefaultFieldType.TitleAndDescription,
@@ -35,6 +54,19 @@ describe("mapFieldToZod", () => {
         },
       } as FormFieldDto);
       expect(zodType).toBeNull();
+    });
+
+    test.each(defaultFieldKeys)("should map %s to correct ZodType", (key) => {
+      const field = { type: { id: defaultFieldTypes[key] } } as FormFieldDto;
+      if (shouldSkipField(field)) {
+        return;
+      }
+      const expectedZodType = fieldMappings[defaultFieldTypes[key]];
+      const zodType = mapFieldToZod(field);
+      if (zodType !== null) {
+        expect(zodType).toBeInstanceOf(z.ZodOptional);
+        expect(findBaseDef(zodType)).toBeInstanceOf(expectedZodType);
+      }
     });
   });
 

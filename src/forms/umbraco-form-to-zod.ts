@@ -8,6 +8,7 @@ import {
   getAllFieldsOnPage,
   getFieldByAlias,
   getFieldByZodIssue,
+  shouldSkipField,
 } from "./field-utils";
 import type {
   FormDto,
@@ -116,16 +117,6 @@ function mapFieldsToZodObject(
   return z.object(mappedFields);
 }
 
-/**
- * Determines whether a given form field should be skipped based on its type.
- *
- * @param field - The form field to evaluate.
- * @returns A boolean value indicating whether the field should be skipped.
- */
-function shouldSkipField(field: FormFieldDto): boolean {
-  return field?.type?.id === DefaultFieldType.TitleAndDescription;
-}
-
 export function umbracoFormPageToZodSchema(
   form: FormDto,
   page: FormPageDto,
@@ -198,6 +189,7 @@ export function mapFieldToZod(
       DefaultFieldType.RichText,
       DefaultFieldType.Password,
       DefaultFieldType.HiddenField,
+      DefaultFieldType.SingleChoice,
       () => {
         zodType = z.string({
           required_error: field?.requiredErrorMessage,
@@ -237,7 +229,6 @@ export function mapFieldToZod(
     })
     .with(
       DefaultFieldType.Checkbox,
-      DefaultFieldType.SingleChoice,
       DefaultFieldType.DataConsent,
       DefaultFieldType.Recaptcha2,
       DefaultFieldType.RecaptchaV3WithScore,
