@@ -122,7 +122,9 @@ export function umbracoFormPageToZodSchema(
   page: FormPageDto,
   mapCustomFieldToZodType?: MapFormFieldToZodFn,
 ): UmbracoFormSchema {
-  const fields = getAllFieldsOnPage(page).filter(shouldSkipField);
+  const fields = getAllFieldsOnPage(page).filter(
+    (field) => shouldSkipField(field) === false,
+  );
   return mapFieldsToZodObject(fields).superRefine(
     refineForConditionals(form, fields, mapCustomFieldToZodType),
   ) as UmbracoFormSchema;
@@ -152,7 +154,9 @@ export function umbracoFormToZodSchema(
   form: FormDto,
   mapCustomFieldToZodType?: MapFormFieldToZodFn,
 ): UmbracoFormSchema {
-  const fields = getAllFields(form).filter(shouldSkipField);
+  const fields = getAllFields(form).filter(
+    (field) => shouldSkipField(field) === false,
+  );
 
   const schema = mapFieldsToZodObject(fields).superRefine(
     refineForConditionals(form, fields, mapCustomFieldToZodType),
@@ -193,7 +197,7 @@ export function mapFieldToZod(
       () => {
         zodType = z.string({
           required_error: field?.requiredErrorMessage,
-          coerce: true,
+          invalid_type_error: field?.requiredErrorMessage,
         });
         if (field?.required && !hasCondition) {
           zodType = (zodType as z.ZodString).min(
