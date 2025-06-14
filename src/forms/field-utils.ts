@@ -56,6 +56,9 @@ export function getAllFields(form: FormDto): FormFieldDto[] {
     )
     .filter(Boolean) as FormFieldDto[];
 
+  if (!flattenedFields || flattenedFields?.length === 0)
+    throw Error("Form definition contains no fields");
+
   /// cache flattened fields by id and alias
   const idMap = new Map<string, FormFieldDto>();
   const aliasMap = new Map<string, FormFieldDto>();

@@ -153,7 +153,6 @@ export function umbracoFormToZodSchema(
   mapCustomFieldToZodType?: MapFormFieldToZodFn,
 ): UmbracoFormSchema {
   const fields = getAllFields(form).filter(shouldSkipField);
-
   const schema = mapFieldsToZodObject(fields).superRefine(
     refineForConditionals(form, fields, mapCustomFieldToZodType),
   );

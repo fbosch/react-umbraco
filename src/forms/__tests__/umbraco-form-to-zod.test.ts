@@ -96,13 +96,52 @@ describe("mapFieldToZod", () => {
       expect(zodType).toBeInstanceOf(z.ZodType);
     });
   });
+
+  describe("negative and edge cases", () => {
+    test("throws if field.type is missing", () => {
+      //@ts-expect-error
+      const field = { type: undefined } as FormFieldDto;
+      expect(() => mapFieldToZod(field)).toThrowError();
+    });
+
+    test("throws if field.type.id is missing", () => {
+      //@ts-expect-error
+      const field = { type: { id: undefined } } as FormFieldDto;
+      expect(() => mapFieldToZod(field)).toThrowError();
+    });
+
+    test("throws if field.type.id is unknown", () => {
+      const field = { type: { id: "NonExistentType" } } as FormFieldDto;
+      expect(() => mapFieldToZod(field)).toThrowError();
+    });
+  });
 });
 
-describe("umbracoFormToZod", () => {
-  test.skip("should convert form definition to zod schema", () => {
+describe("umbracoFormToZodSchema", () => {
+  test("should convert form definition to zod schema", () => {
     const schema = umbracoFormToZodSchema(formDefinition as FormDto);
     expect(schema).toBeInstanceOf(z.ZodType);
     expect(schema).toMatchSnapshot();
+  });
+
+  test("form definition with no fields throws error", () => {
+    const form = { fields: [] } as unknown as FormDto;
+    expect(() => umbracoFormToZodSchema(form)).toThrowError();
+  });
+
+  test("empty input throws error", () => {
+    expect(() =>
+      umbracoFormToZodSchema({} as unknown as FormDto),
+    ).toThrowError();
+    expect(() =>
+      umbracoFormToZodSchema(undefined as unknown as FormDto),
+    ).toThrowError();
+    expect(() =>
+      umbracoFormToZodSchema(null as unknown as FormDto),
+    ).toThrowError();
+    expect(() =>
+      umbracoFormToZodSchema(0 as unknown as FormDto),
+    ).toThrowError();
   });
 });
 

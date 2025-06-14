@@ -1,4 +1,4 @@
-import { getFieldById } from "./field-utils";
+import { getFieldById, shouldSkipField } from "./field-utils";
 import type {
   DtoWithCondition,
   FieldConditionRuleOperator,
@@ -75,6 +75,10 @@ export function areAllRulesFulfilled(
       throw new Error(
         `Rule target for field id: "${rule.field}" could not be found in the form definition`,
       );
+    }
+
+    if (shouldSkipField(targetField, data)) {
+      return false;
     }
     const fieldZodType = mapFieldToZod(targetField, mapCustomFieldToZodType);
 

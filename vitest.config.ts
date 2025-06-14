@@ -4,6 +4,9 @@ export default defineConfig({
   optimizeDeps: { include: ["react/jsx-dev-runtime"] },
   test: {
     globals: true,
+    coverage: {
+      reportsDirectory: "./coverage",
+    },
     workspace: [
       {
         extends: true,
