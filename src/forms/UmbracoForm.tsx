@@ -337,31 +337,28 @@ function UmbracoForm(props: UmbracoFormProps) {
 
   const handleOnSubmit = React.useCallback(
     (e: React.FormEvent<HTMLFormElement>) => {
+      const formData = new FormData(e.target as HTMLFormElement);
+      const coercedData = coerceFormData(formData, config.schema);
+
       if (config.shouldValidate && config.shouldUseNativeValidation === false) {
         e.preventDefault();
         if (totalPages > 1 && currentPageIndex !== totalPages - 1) {
           return handleNextPage();
         }
-        React.startTransition(() => {
-          setAttemptCount((prev) => prev + 1);
-          const validationResult = validateFormData(internalData);
+        setAttemptCount((prev) => prev + 1);
+        const validationResult = validateFormData(coercedData);
 
-          if (validationResult.success === false) {
-            focusFirstInvalidField();
-            if (form.showValidationSummary) {
-              setSummaryIssues(validationResult.error.issues);
-            }
-            return;
+        if (validationResult.success === false) {
+          focusFirstInvalidField();
+          if (form.showValidationSummary) {
+            setSummaryIssues(validationResult.error.issues);
           }
-          setSummaryIssues([]);
-          if (typeof onSubmit === "function") {
-            onSubmit(e, internalData);
-          }
-        });
-      } else {
-        if (typeof onSubmit === "function") {
-          onSubmit(e, internalData);
+          return;
         }
+        setSummaryIssues([]);
+      }
+      if (typeof onSubmit === "function") {
+        onSubmit(e, coercedData);
       }
     },
     [
@@ -370,7 +367,6 @@ function UmbracoForm(props: UmbracoFormProps) {
       focusFirstInvalidField,
       config,
       onSubmit,
-      internalData,
       form.showValidationSummary,
       handleNextPage,
       validateFormData,

@@ -24,7 +24,15 @@ const cachedFieldsByPage = new WeakMap<FormPageDto, FormFieldDto[]>();
  * @returns A boolean value indicating whether the field should be skipped.
  */
 export function shouldSkipField(field: FormFieldDto): boolean {
-  return field?.type?.id === DefaultFieldType.TitleAndDescription;
+  return match(field.type.id)
+    .with(
+      DefaultFieldType.TitleAndDescription,
+      // handled in validateRecaptcha callback
+      DefaultFieldType.Recaptcha2,
+      DefaultFieldType.RecaptchaV3WithScore,
+      () => true,
+    )
+    .otherwise(() => false);
 }
 
 /**
